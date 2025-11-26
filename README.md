@@ -41,3 +41,17 @@ Es bietet eine moderne, mandantenfähige Verwaltung von Prozessen, Dokumenten un
 - Zero-Config Start innerhalb von 1 Minute
 
 ---
+
+---
+
+## 📦 Installation mit Docker
+
+### **Voraussetzungen**
+- Docker
+- Docker Compose (oder `docker compose`)
+
+### **Schritt 1: Repository klonen**
+
+```bash
+git clone https://github.com/Dirk23/Novoboard.git
+cd Novoboard
