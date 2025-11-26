@@ -1,0 +1,96 @@
+services:
+  db:
+    image: hildebrandit/novoboard-db:beta1
+    container_name: novoboard-db
+    restart: unless-stopped
+    env_file:
+      - ./.env
+    environment:
+      # aus den DB_* Variablen der .env abgeleitet
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASS}
+    ports:
+      - "63307:3306"
+    volumes:
+      # Nur noch Daten-Persistenz, KEIN init-Mount mehr
+      - ./docker/db/data:/var/lib/mysql
+    networks:
+      - novoboard-net
+    healthcheck:
+      test: >
+        bash -lc "
+        mariadb -uroot -p$${DB_ROOT_PASS} -e
+        'SELECT 1 FROM INFORMATION_SCHEMA.TABLES
+         WHERE TABLE_SCHEMA=\"${DB_NAME}\" AND TABLE_NAME=\"app_users\" LIMIT 1;'
+        >/dev/null 2>&1
+        "
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  php:
+    image: hildebrandit/novoboard:beta1
+    container_name: novoboard-php
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    working_dir: /var/www/html
+    env_file:
+      - ./.env
+    networks:
+      - novoboard-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  cron:
+    image: hildebrandit/novoboard-cron:beta1
+    container_name: novoboard-cron
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    working_dir: /var/www/html
+    env_file:
+      - ./.env
+    environment:
+      TZ: Europe/Berlin
+    networks:
+      - novoboard-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  nginx:
+    image: hildebrandit/novoboard-nginx:beta1
+    container_name: novoboard-nginx
+    restart: unless-stopped
+    depends_on:
+      php:
+        condition: service_started
+    ports:
+      - "8091:80"
+    networks:
+      - novoboard-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  novoboard-net:
+    driver: bridge
