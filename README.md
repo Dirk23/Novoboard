@@ -1,4 +1,5 @@
-# Novoboard
+# <img width="937" height="275" alt="Novoboard Logo" src="https://github.com/user-attachments/assets/b80353b3-e66a-4015-9bc3-e9378692fe0b" />
+
 
 Novoboard ist ein webbasiertes On- und Offboarding-Management-System für Unternehmen, Kliniken und Organisationen.  
 Es bietet eine moderne, mandantenfähige Verwaltung von Prozessen, Dokumenten und Benutzerzugängen – vollständig in PHP entwickelt und vollständig Docker-fähig.
@@ -49,7 +50,7 @@ Es bietet eine moderne, mandantenfähige Verwaltung von Prozessen, Dokumenten un
 
 *   Docker
     
-*   Docker Compose (oder “docker compose”)
+*   Docker Compose
     
 
 ### **Schritt 1: Repository klonen**
