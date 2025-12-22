@@ -1,6 +1,6 @@
 services:
   db:
-    image: hildebrandit/novoboard-db:beta1
+    image: hildebrandit/novoboard-db:latest
     container_name: novoboard-db
     restart: unless-stopped
     env_file:
@@ -37,7 +37,7 @@ services:
         max-file: "5"
 
   php:
-    image: hildebrandit/novoboard:beta1
+    image: hildebrandit/novoboard:latest
     container_name: novoboard-php
     restart: unless-stopped
     depends_on:
@@ -46,6 +46,8 @@ services:
     working_dir: /var/www/html
     env_file:
       - ./.env
+    environment:
+      APP_VERSION: ${APP_VERSION}
     networks:
       - novoboard-net
     logging:
@@ -55,7 +57,7 @@ services:
         max-file: "5"
 
   cron:
-    image: hildebrandit/novoboard-cron:beta1
+    image: hildebrandit/novoboard-cron:latest
     container_name: novoboard-cron
     restart: unless-stopped
     depends_on:
@@ -66,6 +68,7 @@ services:
       - ./.env
     environment:
       TZ: Europe/Berlin
+      APP_VERSION: ${APP_VERSION}
     networks:
       - novoboard-net
     logging:
@@ -75,7 +78,7 @@ services:
         max-file: "5"
 
   nginx:
-    image: hildebrandit/novoboard-nginx:beta1
+    image: hildebrandit/novoboard-nginx:latest
     container_name: novoboard-nginx
     restart: unless-stopped
     depends_on:
