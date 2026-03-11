@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+cd /var/www/html
+
+echo "== Git safe.directory setzen =="
+git config --global --add safe.directory /var/www/html || true
+
+echo "== Composer install =="
+composer install --no-dev --prefer-dist --no-interaction || true
+composer dump-autoload -o --no-interaction || true
+
+echo "== Running DB migrations =="
+php /var/www/html/bin/migrate.php || {
+    echo "Migration failed!" >&2
+    exit 1
+}
+
+echo "== Starting PHP-FPM =="
+exec php-fpm

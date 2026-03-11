@@ -1,0 +1,5 @@
+.env
+storage/
+projekt/
+docker/db/data/
+docker/db/data-dev/

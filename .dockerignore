@@ -1,0 +1,34 @@
+# .dockerignore
+.git
+projekt/.git
+.gitignore
+**/.DS_Store
+
+# lokale Daten / Volumes
+docker/db/data
+docker/db/backups
+
+# Node / Frontend
+node_modules
+**/node_modules
+
+# Logs / Temp
+*.log
+**/*.log
+storage/tmp
+projekt/storage/tmp
+projekt/storage/**
+!projekt/storage/version.txt
+
+# Runtime-Uploads / generierte Assets
+projekt/public/storage/**
+projekt/public/uploads/**
+projekt/public/assets/generated/**
+
+# Composer vendor NICHT in den Build-Context schicken (wird im Image gebaut)
+projekt/vendor
+**/vendor
+
+# IDE/OS
+.idea
+.vscode

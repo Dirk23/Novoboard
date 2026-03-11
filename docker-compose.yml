@@ -1,0 +1,112 @@
+name: ${COMPOSE_PROJECT_NAME:-novoboard-dev}
+
+services:
+  db:
+    image: hildebrandit/novoboard-db:latest
+    restart: unless-stopped
+    security_opt:
+      - apparmor=unconfined
+    env_file:
+      - ./.env
+    environment:
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASS}
+      MARIADB_DATABASE: ${DB_NAME}
+      MARIADB_USER: ${DB_USER}
+      MARIADB_PASSWORD: ${DB_PASS}
+    ports:
+      - "127.0.0.1:${DB_PUBLISHED_PORT:-63308}:3306"
+    volumes:
+      - ${DB_DATA_DIR:-./docker/db/data-dev}:/var/lib/mysql
+    networks:
+      - novoboard-net
+    healthcheck:
+      test: >
+        bash -lc "
+        mariadb -uroot -p$${DB_ROOT_PASS} -e
+        'SELECT 1 FROM INFORMATION_SCHEMA.TABLES
+         WHERE TABLE_SCHEMA=\"${DB_NAME}\" AND TABLE_NAME=\"app_users\" LIMIT 1;'
+        >/dev/null 2>&1
+        "
+      interval: 5s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  php:
+    image: hildebrandit/novoboard:latest
+    restart: unless-stopped
+    security_opt:
+      - apparmor=unconfined
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./projekt:/var/www/html
+    working_dir: /var/www/html
+    env_file:
+      - ./.env
+    environment:
+      APP_VERSION: ${APP_VERSION}
+      COMPOSER_ALLOW_SUPERUSER: "1"
+    networks:
+      - novoboard-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  cron:
+    image: hildebrandit/novoboard-cron:latest
+    restart: unless-stopped
+    security_opt:
+      - apparmor=unconfined
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./projekt:/var/www/html
+    working_dir: /var/www/html
+    env_file:
+      - ./.env
+    environment:
+      TZ: Europe/Berlin
+      APP_VERSION: ${APP_VERSION}
+    command: ["/usr/local/bin/start-cron.sh"]
+    networks:
+      - novoboard-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+  nginx:
+    image: hildebrandit/novoboard-nginx:latest
+    restart: unless-stopped
+    security_opt:
+      - apparmor=unconfined
+    depends_on:
+      php:
+        condition: service_started
+    ports:
+      - "${NGINX_PUBLISHED_PORT:-8092}:80"
+    volumes:
+      - ./projekt:/var/www/html:ro
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - novoboard-net
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+networks:
+  novoboard-net:
+    driver: bridge

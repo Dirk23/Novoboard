@@ -1,0 +1,7 @@
+# docker/db/Dockerfile.prod
+FROM mariadb:11
+
+# Init-Skripte (laufen nur bei leerem /var/lib/mysql beim ersten Start)
+COPY projekt/config/00-create-db.sql /docker-entrypoint-initdb.d/00-create-db.sql
+COPY projekt/config/10-schema.sql    /docker-entrypoint-initdb.d/10-schema.sql
+COPY projekt/config/20-seed.sql      /docker-entrypoint-initdb.d/20-seed.sql
