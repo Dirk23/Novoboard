@@ -6,9 +6,13 @@ cd /var/www/html
 echo "== Git safe.directory setzen =="
 git config --global --add safe.directory /var/www/html || true
 
-echo "== Composer install =="
-composer install --no-dev --prefer-dist --no-interaction || true
-composer dump-autoload -o --no-interaction || true
+if [ ! -f /var/www/html/vendor/autoload.php ]; then
+    echo "== Composer bootstrap =="
+    composer install --no-dev --prefer-dist --no-interaction || true
+    composer dump-autoload -o --no-interaction || true
+else
+    echo "== Composer bootstrap übersprungen (vendor vorhanden) =="
+fi
 
 echo "== Running DB migrations =="
 php /var/www/html/bin/migrate.php || {
