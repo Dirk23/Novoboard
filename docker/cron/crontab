@@ -7,6 +7,11 @@ PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Mail-Worker: max 55 Sekunden laufen lassen
 * * * * * . /etc/profile.d/00-env.sh; cd /var/www/html && timeout 55 /usr/local/bin/php bin/worker_send_mail.php >> /proc/1/fd/1 2>&1
 
+# Heute fällige Prozesse benachrichtigen
+*/15 * * * * . /etc/profile.d/00-env.sh; cd /var/www/html && timeout 55 /usr/local/bin/php bin/process_due_notifications.php >> /proc/1/fd/1 2>&1
+
+# Task-Erinnerungen für heute verschicken
+*/15 * * * * . /etc/profile.d/00-env.sh; cd /var/www/html && timeout 55 /usr/local/bin/php bin/task_reminder_notifications.php >> /proc/1/fd/1 2>&1
+
 # Cleanup
 0 3 * * * . /etc/profile.d/00-env.sh; cd /var/www/html && /usr/local/bin/php bin/cleanup_old_processes.php >> /proc/1/fd/1 2>&1
-
