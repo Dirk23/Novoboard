@@ -323,7 +323,7 @@ CREATE TABLE `offboarding_suggestions`
     `actor_id`      bigint                                                                 DEFAULT NULL,
     `acted_at`      datetime                                                               DEFAULT NULL,
     PRIMARY KEY (`id`),
-    UNIQUE KEY `tenant_id` (`tenant_id`, `sam`, `expires_at`),
+    UNIQUE KEY `uniq_tenant_sam` (`tenant_id`, `sam`),
     KEY `process_id` (`process_id`),
     KEY `actor_id` (`actor_id`),
     KEY `tenant_id_2` (`tenant_id`, `status`, `expires_at`),
