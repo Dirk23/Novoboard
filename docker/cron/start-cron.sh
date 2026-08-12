@@ -3,6 +3,10 @@ set -eu
 
 log() { printf '[%s] %s\n' "$(date '+%Y-%m-%d %H:%M:%S')" "$*"; }
 
+APP_TZ="${TZ:-Europe/Berlin}"
+echo "date.timezone=${APP_TZ}" > /usr/local/etc/php/conf.d/99-timezone.ini
+export TZ="${APP_TZ}"
+
 # --------------------------------------------------------
 #  .env ins Environment exportieren
 # --------------------------------------------------------

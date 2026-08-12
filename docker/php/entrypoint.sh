@@ -3,6 +3,10 @@ set -e
 
 cd /var/www/html
 
+APP_TZ="${TZ:-Europe/Berlin}"
+echo "date.timezone=${APP_TZ}" > /usr/local/etc/php/conf.d/99-timezone.ini
+export TZ="${APP_TZ}"
+
 echo "== Git safe.directory setzen =="
 git config --global --add safe.directory /var/www/html || true
 

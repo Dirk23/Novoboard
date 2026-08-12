@@ -288,6 +288,7 @@ CREATE TABLE `employees`
     `kontakt_json`         json   NOT NULL                                          DEFAULT (json_object()),
     `anrede`               enum ('Herr','Frau','Divers') COLLATE utf8mb4_unicode_ci DEFAULT NULL,
     `titel`                varchar(100) COLLATE utf8mb4_unicode_ci                  DEFAULT NULL,
+    `facharzttitel`        text COLLATE utf8mb4_unicode_ci                           DEFAULT NULL,
     `geschlecht`           enum ('m','w','d') COLLATE utf8mb4_unicode_ci            DEFAULT NULL,
     `pate`                 varchar(200) COLLATE utf8mb4_unicode_ci                  DEFAULT NULL,
     PRIMARY KEY (`id`),
