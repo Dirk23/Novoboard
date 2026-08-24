@@ -1,0 +1,66 @@
+# docker/php/Dockerfile.prod
+FROM php:8.3-fpm
+
+# System Packages
+RUN apt-get update && apt-get install -y \
+    git \
+    qpdf \
+    unzip \
+    libzip-dev \
+    libldap2-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libicu-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# PHP Extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+ && docker-php-ext-install \
+        pdo_mysql \
+        intl \
+        mbstring \
+        zip \
+        ldap \
+        gd
+
+# Arbeitsverzeichnis
+WORKDIR /var/www/html
+
+# Composer installieren (global)
+RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" \
+ && php composer-setup.php --install-dir=/usr/local/bin --filename=composer \
+ && rm composer-setup.php
+
+# ----------------------------------------------------
+# Projekt-Code INS IMAGE kopieren (Produktions-/Beta-Stand)
+# ----------------------------------------------------
+# WICHTIG: Build-Kontext muss das Verzeichnis sein, in dem "projekt/" liegt.
+COPY projekt/ /var/www/html/
+
+# Composer im Image ausführen (ohne dev-Abhängigkeiten)
+RUN cd /var/www/html \
+ && composer install --no-dev --prefer-dist --no-interaction \
+ && composer dump-autoload -o --no-interaction
+
+# mPDF + PDF-Assets: Verzeichnisse anlegen und Rechte setzen
+# (nach COPY + composer, damit alle relevanten Pfade existieren)
+RUN mkdir -p /var/www/html/storage/tmp/mpdf \
+    /var/www/html/public/storage/tenant_assets \
+    && chown -R www-data:www-data /var/www/html/storage /var/www/html/public/storage \
+    && chmod -R 775 /var/www/html/storage /var/www/html/public/storage
+
+# Optional: gesamter Code dem Webserver-User gehören
+RUN chown -R www-data:www-data /var/www/html
+
+# ----------------------------------------------------
+# Entrypoint (Composer + Migration + php-fpm)
+# ----------------------------------------------------
+# Achtung: Build-Context ist ".", daher Pfad relativ zum Projektroot:
+COPY docker/php/entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["entrypoint.sh"]
+CMD ["php-fpm"]
